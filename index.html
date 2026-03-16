@@ -395,6 +395,9 @@
       .testimonials-grid { grid-template-columns: 1fr; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
       .hero-stats { gap: 24px; }
+      .hero { padding-top: 160px; padding-bottom: 80px; }
+      .hero-title { font-size: 52px; }
+
     }
     @media (max-width: 600px) {
       section { padding: 70px 5%; }
@@ -742,24 +745,28 @@ if (session) {
 
     // Mobile menu toggle (basic)
     function toggleMenu() {
-      const links = document.querySelector('.nav-links');
-      const cta = document.querySelector('.nav-cta');
-      if (links.style.display === 'flex') {
-        links.style.display = 'none';
-        if (cta) cta.style.display = 'none';
-      } else {
-        links.style.display = 'flex';
-        links.style.flexDirection = 'column';
-        links.style.position = 'absolute';
-        links.style.top = '70px';
-        links.style.left = '0';
-        links.style.right = '0';
-        links.style.background = '#080808';
-        links.style.padding = '24px 6%';
-        links.style.gap = '20px';
-        links.style.borderBottom = '1px solid rgba(227,34,34,0.2)';
-      }
-    }
+  const links = document.querySelector('.nav-links');
+  const isOpen = links.style.display === 'flex';
+  if (isOpen) {
+    links.style.display = 'none';
+  } else {
+    links.style.display = 'flex';
+    links.style.flexDirection = 'column';
+    links.style.position = 'absolute';
+    links.style.top = '65px';
+    links.style.left = '0';
+    links.style.right = '0';
+    links.style.background = '#080808';
+    links.style.padding = '20px 6%';
+    links.style.gap = '20px';
+    links.style.borderBottom = '1px solid rgba(227,34,34,0.2)';
+    links.style.zIndex = '998';
+    // Close menu when any link clicked
+    links.querySelectorAll('a').forEach(a => {
+      a.onclick = () => { links.style.display = 'none'; };
+    });
+  }
+}
   </script>
 </body>
 </html>

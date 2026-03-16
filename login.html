@@ -152,15 +152,33 @@
     .switch-tab a:hover { text-decoration: underline; }
 
     /* RESPONSIVE */
-    @media (max-width: 860px) {
-      .login-page { grid-template-columns: 1fr; }
-      .left-panel { display: none; }
-      .right-panel { padding: 40px 6%; min-height: calc(100vh - 70px); }
-    }
-    @media (max-width: 480px) {
-      .right-panel { padding: 30px 5%; }
-      .social-logins { grid-template-columns: 1fr; }
-    }
+@media (max-width: 860px) {
+  .login-page {
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+  }
+  .left-panel { display: none; }
+  .right-panel {
+    padding: 30px 6%;
+    min-height: calc(100vh - 70px);
+    align-items: flex-start;
+  }
+  .auth-box {
+    width: 100%;
+    max-width: 100%;
+    padding-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .right-panel { padding: 20px 5%; }
+  .auth-title { font-size: 28px; }
+  .social-logins { grid-template-columns: 1fr; }
+  .auth-tabs { margin-bottom: 24px; }
+  .form-group { margin-bottom: 14px; }
+  nav { padding: 14px 5%; }
+  .nav-logo { font-size: 22px; }
+}
   </style>
 </head>
 <body>
