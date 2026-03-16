@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Login - CarService</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --red: #e32222; --dark: #0d0d0d; --darker: #080808;
+      --gray: #1a1a1a; --muted: #888; --light: #f5f5f0; --white: #ffffff;
+      --font-head: 'Bebas Neue', sans-serif; --font-body: 'Barlow', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--darker); color: var(--light); overflow-x: hidden; min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+
+    /* NAVBAR */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 999; display: flex; align-items: center; justify-content: space-between; padding: 18px 6%; background: rgba(8,8,8,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(227,34,34,0.15); }
+    .nav-logo { font-family: var(--font-head); font-size: 28px; letter-spacing: 2px; color: var(--white); }
+    .nav-logo span { color: var(--red); }
+    .nav-back { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; transition: color 0.2s; }
+    .nav-back:hover { color: var(--red); }
+
+    /* SPLIT LAYOUT */
+    .login-page { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; padding-top: 70px; }
+
+    /* LEFT PANEL */
+    .left-panel {
+      background: linear-gradient(145deg, #0d0d0d 0%, #1a0505 50%, #0d0d0d 100%);
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 80px 8%; position: relative; overflow: hidden;
+    }
+    .left-bg-text {
+      position: absolute; bottom: -20px; left: -10px;
+      font-family: var(--font-head); font-size: clamp(100px, 14vw, 180px);
+      color: rgba(227,34,34,0.05); line-height: 1; pointer-events: none;
+      white-space: nowrap;
+    }
+    .left-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--red); margin-bottom: 20px; }
+    .left-badge::before { content: ''; width: 24px; height: 2px; background: var(--red); }
+    .left-title { font-family: var(--font-head); font-size: clamp(44px, 6vw, 72px); color: var(--white); letter-spacing: 2px; line-height: 0.95; margin-bottom: 24px; }
+    .left-title span { color: var(--red); }
+    .left-desc { font-size: 15px; font-weight: 300; color: var(--muted); line-height: 1.8; max-width: 380px; margin-bottom: 44px; }
+    .left-perks { display: flex; flex-direction: column; gap: 18px; }
+    .perk { display: flex; align-items: center; gap: 14px; }
+    .perk-icon { width: 38px; height: 38px; border: 1px solid rgba(227,34,34,0.3); display: flex; align-items: center; justify-content: center; color: var(--red); font-size: 14px; flex-shrink: 0; }
+    .perk-text { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.7); }
+    .left-divider { width: 40px; height: 2px; background: rgba(227,34,34,0.3); margin: 40px 0; }
+
+    /* RIGHT PANEL */
+    .right-panel { background: var(--gray); display: flex; align-items: center; justify-content: center; padding: 60px 8%; }
+    .auth-box { width: 100%; max-width: 440px; }
+
+    /* TABS */
+    .auth-tabs { display: flex; gap: 0; margin-bottom: 36px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .auth-tab { flex: 1; padding: 14px 0; font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; text-align: center; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.2s, border-color 0.2s; background: none; border-top: none; border-left: none; border-right: none; font-family: var(--font-body); }
+    .auth-tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+    /* PANELS */
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; }
+    .auth-title { font-family: var(--font-head); font-size: 34px; color: var(--white); letter-spacing: 1px; margin-bottom: 6px; }
+    .auth-sub { font-size: 13px; font-weight: 300; color: var(--muted); margin-bottom: 30px; line-height: 1.6; }
+
+    /* FORM ELEMENTS */
+    .form-group { margin-bottom: 18px; position: relative; }
+    label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; }
+    .input-wrap { position: relative; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; transition: color 0.2s; }
+    .form-control {
+      width: 100%; background: var(--darker); border: 1px solid rgba(255,255,255,0.08);
+      color: var(--light); padding: 13px 16px 13px 42px;
+      font-size: 14px; font-family: var(--font-body); font-weight: 300;
+      outline: none; transition: border-color 0.2s, background 0.2s;
+    }
+    .form-control:focus { border-color: var(--red); }
+    .form-control:focus + .input-icon, .input-wrap:focus-within .input-icon { color: var(--red); }
+    .form-control.error { border-color: var(--red); background: rgba(227,34,34,0.04); }
+    .form-control.success { border-color: #3b9e3b; }
+    .form-control::placeholder { color: rgba(255,255,255,0.18); }
+    .toggle-pw { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; cursor: pointer; transition: color 0.2s; background: none; border: none; }
+    .toggle-pw:hover { color: var(--red); }
+    .error-msg { font-size: 11px; color: var(--red); margin-top: 5px; display: none; }
+    .error-msg.show { display: block; }
+
+    /* Password strength */
+    .pw-strength { margin-top: 8px; display: none; }
+    .pw-strength.show { display: block; }
+    .pw-bars { display: flex; gap: 4px; margin-bottom: 4px; }
+    .pw-bar { flex: 1; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; transition: background 0.3s; }
+    .pw-bar.weak { background: var(--red); }
+    .pw-bar.medium { background: #e39022; }
+    .pw-bar.strong { background: #3b9e3b; }
+    .pw-label { font-size: 11px; color: var(--muted); }
+
+    /* Checkbox */
+    .check-group { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 22px; }
+    .check-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--red); flex-shrink: 0; margin-top: 2px; cursor: pointer; }
+    .check-group label { font-size: 12px; font-weight: 300; color: var(--muted); letter-spacing: 0; text-transform: none; margin: 0; cursor: pointer; line-height: 1.6; }
+    .check-group label a { color: var(--red); }
+    .check-err { font-size: 11px; color: var(--red); margin-top: -16px; margin-bottom: 14px; display: none; }
+    .check-err.show { display: block; }
+
+    /* Forgot */
+    .forgot-row { display: flex; justify-content: flex-end; margin-top: -10px; margin-bottom: 22px; }
+    .forgot-link { font-size: 12px; color: var(--muted); transition: color 0.2s; }
+    .forgot-link:hover { color: var(--red); }
+
+    /* Submit */
+    .btn-submit {
+      width: 100%; background: var(--red); color: var(--white);
+      padding: 15px; font-size: 13px; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase; border: none; cursor: pointer;
+      clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+      transition: background 0.2s, transform 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-family: var(--font-body);
+    }
+    .btn-submit:hover { background: #c01c1c; transform: translateY(-2px); }
+    .btn-submit:disabled { background: #444; cursor: not-allowed; transform: none; }
+
+    /* Divider */
+    .or-divider { display: flex; align-items: center; gap: 14px; margin: 24px 0; }
+    .or-line { flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+    .or-text { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+    /* Social login */
+    .social-logins { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .social-btn {
+      padding: 11px; border: 1px solid rgba(255,255,255,0.1); background: transparent;
+      color: var(--muted); font-size: 13px; font-family: var(--font-body);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s;
+    }
+    .social-btn:hover { border-color: var(--red); color: var(--white); }
+
+    /* Success state */
+    .auth-success { display: none; text-align: center; padding: 20px 0; }
+    .auth-success.show { display: block; }
+    .success-icon { font-size: 52px; color: #3b9e3b; margin-bottom: 16px; }
+    .success-title { font-family: var(--font-head); font-size: 32px; color: var(--white); margin-bottom: 10px; }
+    .success-sub { font-size: 14px; font-weight: 300; color: var(--muted); line-height: 1.7; margin-bottom: 28px; }
+    .btn-outline-red { display: inline-block; padding: 13px 32px; border: 1px solid var(--red); color: var(--red); font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; transition: background 0.2s, color 0.2s; }
+    .btn-outline-red:hover { background: var(--red); color: var(--white); }
+
+    /* Switch tab link */
+    .switch-tab { font-size: 13px; font-weight: 300; color: var(--muted); text-align: center; margin-top: 20px; }
+    .switch-tab a { color: var(--red); font-weight: 500; cursor: pointer; }
+    .switch-tab a:hover { text-decoration: underline; }
+
+    /* RESPONSIVE */
+    @media (max-width: 860px) {
+      .login-page { grid-template-columns: 1fr; }
+      .left-panel { display: none; }
+      .right-panel { padding: 40px 6%; min-height: calc(100vh - 70px); }
+    }
+    @media (max-width: 480px) {
+      .right-panel { padding: 30px 5%; }
+      .social-logins { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a href="index.html" class="nav-logo">CAR<span>SERVICE</span></a>
+    <a href="index.html" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+  </nav>
+
+  <!-- SPLIT LAYOUT -->
+  <div class="login-page">
+
+    <!-- LEFT: Branding Panel -->
+    <div class="left-panel">
+      <div class="left-bg-text">DRIVE</div>
+      <p class="left-badge">Customer Portal</p>
+      <h1 class="left-title">WELCOME<br>BACK TO<br><span>CARSERVICE</span></h1>
+      <p class="left-desc">Log in to track your bookings, view service history, and manage your vehicles — all in one place.</p>
+      <div class="left-perks">
+        <div class="perk">
+          <div class="perk-icon"><i class="fa-solid fa-calendar-check"></i></div>
+          <p class="perk-text">Track & manage your service bookings</p>
+        </div>
+        <div class="perk">
+          <div class="perk-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+          <p class="perk-text">View complete vehicle service history</p>
+        </div>
+        <div class="perk">
+          <div class="perk-icon"><i class="fa-solid fa-bell"></i></div>
+          <p class="perk-text">Get reminders for upcoming services</p>
+        </div>
+        <div class="perk">
+          <div class="perk-icon"><i class="fa-solid fa-tag"></i></div>
+          <p class="perk-text">Exclusive offers for registered customers</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Auth Forms -->
+    <div class="right-panel">
+      <div class="auth-box">
+
+        <!-- TABS -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</button>
+          <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</button>
+        </div>
+
+        <!-- LOGIN PANEL -->
+        <div class="auth-panel active" id="panel-login">
+          <h2 class="auth-title">SIGN IN</h2>
+          <p class="auth-sub">Welcome back! Enter your credentials to access your account.</p>
+
+          <form id="loginForm" novalidate>
+            <div class="form-group">
+              <label for="l-email">Email Address *</label>
+              <div class="input-wrap">
+                <input type="email" id="l-email" class="form-control" placeholder="you@example.com">
+                <i class="fa-solid fa-envelope input-icon"></i>
+              </div>
+              <p class="error-msg" id="l-email-err">Please enter a valid email address.</p>
+            </div>
+
+            <div class="form-group">
+              <label for="l-password">Password *</label>
+              <div class="input-wrap">
+                <input type="password" id="l-password" class="form-control" placeholder="Enter your password">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <button type="button" class="toggle-pw" onclick="togglePw('l-password', this)">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+              <p class="error-msg" id="l-pw-err">Password must be at least 6 characters.</p>
+            </div>
+
+            <div class="forgot-row">
+              <a href="#" class="forgot-link">Forgot password?</a>
+            </div>
+
+            <div class="check-group">
+              <input type="checkbox" id="remember">
+              <label for="remember">Keep me signed in on this device</label>
+            </div>
+
+            <button type="submit" class="btn-submit" id="loginBtn">
+              <i class="fa-solid fa-right-to-bracket"></i> Sign In
+            </button>
+          </form>
+
+          <!-- Success -->
+          <div class="auth-success" id="login-success">
+            <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <h3 class="success-title">WELCOME BACK!</h3>
+            <p class="success-sub">You've logged in successfully. Redirecting to your dashboard...</p>
+            <a href="index.html" class="btn-outline-red">Go to Home</a>
+          </div>
+
+          <div class="or-divider">
+            <div class="or-line"></div>
+            <span class="or-text">Or continue with</span>
+            <div class="or-line"></div>
+          </div>
+
+          <div class="social-logins">
+            <button class="social-btn" onclick="socialLogin('Google')">
+              <i class="fa-brands fa-google"></i> Google
+            </button>
+            <button class="social-btn" onclick="socialLogin('Facebook')">
+              <i class="fa-brands fa-facebook-f"></i> Facebook
+            </button>
+          </div>
+
+          <p class="switch-tab">Don't have an account? <a onclick="switchTab('register')">Register here</a></p>
+        </div>
+
+        <!-- REGISTER PANEL -->
+        <div class="auth-panel" id="panel-register">
+          <h2 class="auth-title">CREATE ACCOUNT</h2>
+          <p class="auth-sub">Join thousands of happy customers. Register to get started.</p>
+
+          <form id="registerForm" novalidate>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+              <div class="form-group">
+                <label for="r-fname">First Name *</label>
+                <div class="input-wrap">
+                  <input type="text" id="r-fname" class="form-control" placeholder="Rahul">
+                  <i class="fa-solid fa-user input-icon"></i>
+                </div>
+                <p class="error-msg" id="r-fname-err">Enter your first name.</p>
+              </div>
+              <div class="form-group">
+                <label for="r-lname">Last Name *</label>
+                <div class="input-wrap">
+                  <input type="text" id="r-lname" class="form-control" placeholder="Sharma">
+                  <i class="fa-solid fa-user input-icon"></i>
+                </div>
+                <p class="error-msg" id="r-lname-err">Enter your last name.</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="r-email">Email Address *</label>
+              <div class="input-wrap">
+                <input type="email" id="r-email" class="form-control" placeholder="you@example.com">
+                <i class="fa-solid fa-envelope input-icon"></i>
+              </div>
+              <p class="error-msg" id="r-email-err">Please enter a valid email address.</p>
+            </div>
+
+            <div class="form-group">
+              <label for="r-phone">Phone Number *</label>
+              <div class="input-wrap">
+                <input type="tel" id="r-phone" class="form-control" placeholder="10-digit mobile number">
+                <i class="fa-solid fa-phone input-icon"></i>
+              </div>
+              <p class="error-msg" id="r-phone-err">Enter a valid 10-digit phone number.</p>
+            </div>
+
+            <div class="form-group">
+              <label for="r-password">Password *</label>
+              <div class="input-wrap">
+                <input type="password" id="r-password" class="form-control" placeholder="Create a strong password" oninput="checkStrength(this.value)">
+                <i class="fa-solid fa-lock input-icon"></i>
+                <button type="button" class="toggle-pw" onclick="togglePw('r-password', this)">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+              <p class="error-msg" id="r-pw-err">Password must be at least 8 characters.</p>
+              <div class="pw-strength" id="pw-strength">
+                <div class="pw-bars">
+                  <div class="pw-bar" id="bar1"></div>
+                  <div class="pw-bar" id="bar2"></div>
+                  <div class="pw-bar" id="bar3"></div>
+                  <div class="pw-bar" id="bar4"></div>
+                </div>
+                <p class="pw-label" id="pw-label">Password strength</p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="r-confirm">Confirm Password *</label>
+              <div class="input-wrap">
+                <input type="password" id="r-confirm" class="form-control" placeholder="Re-enter your password">
+                <i class="fa-solid fa-lock input-icon"></i>
+              </div>
+              <p class="error-msg" id="r-confirm-err">Passwords do not match.</p>
+            </div>
+
+            <div class="check-group">
+              <input type="checkbox" id="r-terms">
+              <label for="r-terms">I agree to the <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a></label>
+            </div>
+            <p class="check-err" id="r-terms-err">You must agree to the terms to register.</p>
+
+            <button type="submit" class="btn-submit" id="registerBtn">
+              <i class="fa-solid fa-user-plus"></i> Create Account
+            </button>
+          </form>
+
+          <!-- Success -->
+          <div class="auth-success" id="register-success">
+            <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <h3 class="success-title">ACCOUNT CREATED!</h3>
+            <p class="success-sub">Welcome to CarService! Your account has been created successfully. You can now log in.</p>
+            <a onclick="switchTab('login')" class="btn-outline-red" style="cursor:pointer;">Go to Login</a>
+          </div>
+
+          <p class="switch-tab">Already have an account? <a onclick="switchTab('login')">Sign in here</a></p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzPlgD3tMljXilmCtZWlqVDVLgsOT_wNjpS0PG6nfcYGDoHs6nLKJMzvTmgaIs4r7kQfg/exec';
+
+    // Switch between Login / Register tabs
+    function switchTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      document.getElementById('panel-' + tab).classList.add('active');
+      // Reset success states
+      document.getElementById('login-success').classList.remove('show');
+      document.getElementById('register-success').classList.remove('show');
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('registerForm').style.display = 'block';
+    }
+
+    // Toggle password visibility
+    function togglePw(id, btn) {
+      const input = document.getElementById(id);
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+      }
+    }
+
+    // Password strength checker
+    function checkStrength(pw) {
+      const strengthDiv = document.getElementById('pw-strength');
+      const label = document.getElementById('pw-label');
+      const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+      if (!pw) { strengthDiv.classList.remove('show'); return; }
+      strengthDiv.classList.add('show');
+      let score = 0;
+      if (pw.length >= 8) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+      bars.forEach((bar, i) => { bar.className = 'pw-bar'; });
+      const cls = score <= 1 ? 'weak' : score <= 2 ? 'medium' : 'strong';
+      const labels = ['', 'Weak', 'Weak', 'Medium', 'Strong'];
+      const colors = ['', '#e32222', '#e39022', '#e39022', '#3b9e3b'];
+      for (let i = 0; i < score; i++) bars[i].classList.add(cls);
+      label.textContent = labels[score] || 'Too short';
+      label.style.color = colors[score] || '#888';
+    }
+
+    // Helpers
+    function setErr(id, errId, msg) {
+      document.getElementById(id).classList.add('error');
+      document.getElementById(id).classList.remove('success');
+      const e = document.getElementById(errId);
+      if (msg) e.textContent = msg;
+      e.classList.add('show');
+    }
+    function setOk(id, errId) {
+      document.getElementById(id).classList.remove('error');
+      document.getElementById(id).classList.add('success');
+      document.getElementById(errId).classList.remove('show');
+    }
+
+    // Live validation - login
+    document.getElementById('l-email').addEventListener('input', function() {
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.value) ? setOk('l-email','l-email-err') : setErr('l-email','l-email-err');
+    });
+    document.getElementById('l-password').addEventListener('input', function() {
+      this.value.length >= 6 ? setOk('l-password','l-pw-err') : setErr('l-password','l-pw-err');
+    });
+
+    // Live validation - register
+    document.getElementById('r-fname').addEventListener('input', function() { this.value.trim().length >= 2 ? setOk('r-fname','r-fname-err') : setErr('r-fname','r-fname-err'); });
+    document.getElementById('r-lname').addEventListener('input', function() { this.value.trim().length >= 2 ? setOk('r-lname','r-lname-err') : setErr('r-lname','r-lname-err'); });
+    document.getElementById('r-email').addEventListener('input', function() { /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.value) ? setOk('r-email','r-email-err') : setErr('r-email','r-email-err'); });
+    document.getElementById('r-phone').addEventListener('input', function() { /^[0-9]{10}$/.test(this.value.replace(/\s/g,'')) ? setOk('r-phone','r-phone-err') : setErr('r-phone','r-phone-err'); });
+    document.getElementById('r-password').addEventListener('input', function() { this.value.length >= 8 ? setOk('r-password','r-pw-err') : setErr('r-password','r-pw-err'); });
+    document.getElementById('r-confirm').addEventListener('input', function() {
+      this.value === document.getElementById('r-password').value ? setOk('r-confirm','r-confirm-err') : setErr('r-confirm','r-confirm-err','Passwords do not match.');
+    });
+
+    // Login form submit
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let valid = true;
+      const email = document.getElementById('l-email').value;
+      const pw = document.getElementById('l-password').value;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr('l-email','l-email-err'); valid = false; } else setOk('l-email','l-email-err');
+      if (pw.length < 6) { setErr('l-password','l-pw-err'); valid = false; } else setOk('l-password','l-pw-err');
+      if (!valid) return;
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing in...';
+
+      // Check credentials against localStorage
+      const users = JSON.parse(localStorage.getItem('carservice_users') || '[]');
+      const matched = users.find(u => u.email === email && u.password === pw);
+
+      setTimeout(() => {
+        if (matched) {
+          // Save session so user stays logged in
+          sessionStorage.setItem('carservice_loggedin', JSON.stringify({
+            name: matched.fname + ' ' + matched.lname,
+            email: matched.email
+          }));
+          this.style.display = 'none';
+          document.querySelector('.or-divider').style.display = 'none';
+          document.querySelector('.social-logins').style.display = 'none';
+          document.querySelector('#panel-login .switch-tab').style.display = 'none';
+          const s = document.getElementById('login-success');
+          s.style.display = 'block';
+          setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
+        } else {
+          // Wrong credentials
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
+          setErr('l-email', 'l-email-err', ' ');
+          setErr('l-password', 'l-pw-err', '❌ Incorrect email or password. Please try again.');
+        }
+      }, 1200);
+    });
+
+    // Register form submit
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let valid = true;
+      const fname = document.getElementById('r-fname').value.trim();
+      const lname = document.getElementById('r-lname').value.trim();
+      const email = document.getElementById('r-email').value;
+      const phone = document.getElementById('r-phone').value.replace(/\s/g,'');
+      const pw = document.getElementById('r-password').value;
+      const confirm = document.getElementById('r-confirm').value;
+      const terms = document.getElementById('r-terms').checked;
+      if (fname.length < 2) { setErr('r-fname','r-fname-err'); valid = false; } else setOk('r-fname','r-fname-err');
+      if (lname.length < 2) { setErr('r-lname','r-lname-err'); valid = false; } else setOk('r-lname','r-lname-err');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr('r-email','r-email-err'); valid = false; } else setOk('r-email','r-email-err');
+      if (!/^[0-9]{10}$/.test(phone)) { setErr('r-phone','r-phone-err'); valid = false; } else setOk('r-phone','r-phone-err');
+      if (pw.length < 8) { setErr('r-password','r-pw-err'); valid = false; } else setOk('r-password','r-pw-err');
+      if (confirm !== pw) { setErr('r-confirm','r-confirm-err','Passwords do not match.'); valid = false; } else setOk('r-confirm','r-confirm-err');
+      if (!terms) { document.getElementById('r-terms-err').classList.add('show'); valid = false; } else document.getElementById('r-terms-err').classList.remove('show');
+      if (!valid) return;
+      const btn = document.getElementById('registerBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating account...';
+
+      // Save to localStorage so login works
+      const users = JSON.parse(localStorage.getItem('carservice_users') || '[]');
+      users.push({
+        fname: fname, lname: lname,
+        email: document.getElementById('r-email').value,
+        phone: document.getElementById('r-phone').value,
+        password: document.getElementById('r-password').value
+      });
+      localStorage.setItem('carservice_users', JSON.stringify(users));
+
+      // Send to Google Sheets
+      fetch(SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'register',
+          fname: document.getElementById('r-fname').value,
+          lname: document.getElementById('r-lname').value,
+          phone: document.getElementById('r-phone').value,
+          email: document.getElementById('r-email').value,
+          password: document.getElementById('r-password').value
+        })
+      }).finally(() => {
+        btn.disabled = false;
+        this.style.display = 'none';
+        document.querySelector('#panel-register .switch-tab').style.display = 'none';
+        const s = document.getElementById('register-success');
+        s.style.display = 'block';
+        setTimeout(() => s.classList.add('show'), 50);
+      });
+    });
+
+    // Social login placeholder
+    function socialLogin(provider) {
+      alert('Social login with ' + provider + ' would be connected to a backend in a real project.');
+    }
+  </script>
+</body>
+</html>

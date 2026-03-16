@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - CarService</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --red: #e32222; --dark: #0d0d0d; --darker: #080808;
+      --gray: #1a1a1a; --muted: #888; --light: #f5f5f0; --white: #ffffff;
+      --font-head: 'Bebas Neue', sans-serif; --font-body: 'Barlow', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-body); background: var(--darker); color: var(--light); min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+
+    /* NAVBAR */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 999; display: flex; align-items: center; justify-content: space-between; padding: 18px 6%; background: rgba(8,8,8,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(227,34,34,0.15); }
+    .nav-logo { font-family: var(--font-head); font-size: 28px; letter-spacing: 2px; color: var(--white); }
+    .nav-logo span { color: var(--red); }
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-back { font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; transition: color 0.2s; }
+    .nav-back:hover { color: var(--red); }
+    .nav-user { font-size: 13px; font-weight: 500; color: var(--white); display: flex; align-items: center; gap: 8px; }
+    .nav-user i { color: var(--red); }
+
+    /* LAYOUT */
+    .profile-page { padding: 100px 6% 60px; max-width: 1200px; margin: 0 auto; }
+
+    /* NOT LOGGED IN */
+    .not-logged { text-align: center; padding: 100px 20px; }
+    .not-logged h2 { font-family: var(--font-head); font-size: 48px; color: var(--white); margin-bottom: 16px; }
+    .not-logged p { font-size: 15px; color: var(--muted); margin-bottom: 30px; }
+    .btn-red { background: var(--red); color: var(--white); padding: 14px 36px; font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; display: inline-block; clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%); transition: background 0.2s; }
+    .btn-red:hover { background: #c01c1c; }
+
+    /* PROFILE HEADER */
+    .profile-header { background: var(--gray); padding: 36px 40px; display: flex; align-items: center; gap: 30px; margin-bottom: 24px; border: 1px solid rgba(227,34,34,0.1); position: relative; overflow: hidden; }
+    .profile-header::before { content: ''; position: absolute; right: -20px; top: 50%; transform: translateY(-50%); font-family: var(--font-head); font-size: 180px; color: rgba(227,34,34,0.03); line-height: 1; pointer-events: none; content: 'PROFILE'; }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--red); display: flex; align-items: center; justify-content: center; font-family: var(--font-head); font-size: 32px; color: var(--white); flex-shrink: 0; }
+    .profile-name { font-family: var(--font-head); font-size: 36px; color: var(--white); letter-spacing: 1px; line-height: 1; margin-bottom: 6px; }
+    .profile-email { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+    .profile-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(227,34,34,0.15); color: var(--red); font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 12px; }
+    .profile-actions { margin-left: auto; display: flex; flex-direction: column; gap: 10px; }
+    .btn-outline { border: 1px solid rgba(255,255,255,0.15); color: var(--muted); padding: 10px 20px; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; background: transparent; font-family: var(--font-body); transition: border-color 0.2s, color 0.2s; display: flex; align-items: center; gap: 8px; }
+    .btn-outline:hover { border-color: var(--red); color: var(--red); }
+    .btn-logout { border: 1px solid rgba(227,34,34,0.3); color: var(--red); padding: 10px 20px; font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; background: transparent; font-family: var(--font-body); transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
+    .btn-logout:hover { background: rgba(227,34,34,0.1); }
+
+    /* GRID */
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-bottom: 3px; }
+    .card { background: var(--gray); padding: 30px 32px; }
+    .card-title { font-family: var(--font-head); font-size: 22px; color: var(--white); letter-spacing: 1px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+    .card-title i { color: var(--red); font-size: 18px; }
+
+    /* PERSONAL DETAILS */
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+    .detail-value { font-size: 14px; font-weight: 400; color: var(--light); }
+
+    /* EDIT FORM */
+    .edit-form { display: none; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 20px; }
+    .edit-form.show { display: block; }
+    .edit-group { margin-bottom: 14px; }
+    .edit-group label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px; }
+    .edit-input { width: 100%; background: var(--darker); border: 1px solid rgba(255,255,255,0.08); color: var(--light); padding: 10px 14px; font-size: 13px; font-family: var(--font-body); outline: none; transition: border-color 0.2s; }
+    .edit-input:focus { border-color: var(--red); }
+    .btn-save { background: var(--red); color: var(--white); padding: 10px 24px; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; border: none; cursor: pointer; font-family: var(--font-body); transition: background 0.2s; margin-top: 6px; }
+    .btn-save:hover { background: #c01c1c; }
+    .save-msg { font-size: 12px; color: #3b9e3b; margin-top: 8px; display: none; }
+    .save-msg.show { display: block; }
+
+    /* CAR LOOKUP */
+    .car-lookup { display: flex; gap: 10px; margin-bottom: 20px; }
+    .car-lookup input { flex: 1; background: var(--darker); border: 1px solid rgba(255,255,255,0.08); color: var(--light); padding: 10px 14px; font-size: 13px; font-family: var(--font-body); outline: none; transition: border-color 0.2s; }
+    .car-lookup input:focus { border-color: var(--red); }
+    .car-lookup input::placeholder { color: rgba(255,255,255,0.2); }
+    .btn-search { background: var(--red); color: var(--white); padding: 10px 20px; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; border: none; cursor: pointer; font-family: var(--font-body); white-space: nowrap; transition: background 0.2s; }
+    .btn-search:hover { background: #c01c1c; }
+    .car-result { background: var(--darker); border: 1px solid rgba(255,255,255,0.06); padding: 16px; display: none; }
+    .car-result.show { display: block; }
+    .car-result-title { font-family: var(--font-head); font-size: 20px; color: var(--white); margin-bottom: 12px; }
+    .car-spec { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+    .car-spec:last-child { border-bottom: none; }
+    .car-spec-label { color: var(--muted); }
+    .car-spec-value { color: var(--light); font-weight: 500; }
+    .car-loading { font-size: 13px; color: var(--muted); padding: 10px 0; display: none; }
+    .car-loading.show { display: block; }
+    .car-error { font-size: 13px; color: var(--red); padding: 10px 0; display: none; }
+    .car-error.show { display: block; }
+
+    /* BOOKING HISTORY */
+    .booking-card { background: var(--darker); border-left: 3px solid var(--red); padding: 16px 20px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .booking-service { font-size: 15px; font-weight: 500; color: var(--white); margin-bottom: 4px; }
+    .booking-meta { font-size: 12px; color: var(--muted); }
+    .booking-meta span { color: var(--light); }
+    .booking-status { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 12px; background: rgba(59,158,59,0.15); color: #3b9e3b; white-space: nowrap; }
+    .no-bookings { font-size: 14px; color: var(--muted); text-align: center; padding: 30px; }
+    .no-bookings i { font-size: 32px; color: rgba(255,255,255,0.05); display: block; margin-bottom: 12px; }
+
+    /* STATS ROW */
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-bottom: 24px; }
+    .stat-card { background: var(--gray); padding: 24px; text-align: center; }
+    .stat-num { font-family: var(--font-head); font-size: 40px; color: var(--red); line-height: 1; }
+    .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 6px; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .profile-header { flex-direction: column; text-align: center; }
+      .profile-actions { margin-left: 0; flex-direction: row; }
+      .profile-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a href="index.html" class="nav-logo">CAR<span>SERVICE</span></a>
+    <div class="nav-right">
+      <span class="nav-user"><i class="fa-solid fa-circle-user"></i> <span id="navUserName">My Profile</span></span>
+      <a href="index.html" class="nav-back"><i class="fa-solid fa-arrow-left"></i> Home</a>
+    </div>
+  </nav>
+
+  <!-- PROFILE PAGE -->
+  <div class="profile-page" id="profilePage" style="display:none;">
+
+    <!-- PROFILE HEADER -->
+    <div class="profile-header">
+      <div class="profile-avatar" id="avatarInitials">--</div>
+      <div>
+        <h1 class="profile-name" id="profileName">--</h1>
+        <p class="profile-email" id="profileEmail">--</p>
+        <span class="profile-badge"><i class="fa-solid fa-star"></i> Registered Customer</span>
+      </div>
+      <div class="profile-actions">
+        <button class="btn-outline" onclick="toggleEdit()">
+          <i class="fa-solid fa-pen"></i> Edit Profile
+        </button>
+        <button class="btn-logout" onclick="logout()">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="totalBookings">0</div>
+        <div class="stat-label">Total Bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="lastService">—</div>
+        <div class="stat-label">Last Service</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="memberSince">—</div>
+        <div class="stat-label">Member Since</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="profile-grid">
+
+      <!-- PERSONAL DETAILS -->
+      <div class="card">
+        <h3 class="card-title"><i class="fa-solid fa-user"></i> Personal Details</h3>
+        <div class="detail-row">
+          <span class="detail-label">First Name</span>
+          <span class="detail-value" id="detailFname">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Last Name</span>
+          <span class="detail-value" id="detailLname">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Email</span>
+          <span class="detail-value" id="detailEmail">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Phone</span>
+          <span class="detail-value" id="detailPhone">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Vehicle No</span>
+          <span class="detail-value" id="detailVehicle">—</span>
+        </div>
+
+        <!-- EDIT FORM -->
+        <div class="edit-form" id="editForm">
+          <div class="edit-group">
+            <label>First Name</label>
+            <input type="text" class="edit-input" id="editFname" placeholder="First name">
+          </div>
+          <div class="edit-group">
+            <label>Last Name</label>
+            <input type="text" class="edit-input" id="editLname" placeholder="Last name">
+          </div>
+          <div class="edit-group">
+            <label>Phone</label>
+            <input type="text" class="edit-input" id="editPhone" placeholder="Phone number">
+          </div>
+          <button class="btn-save" onclick="saveProfile()">Save Changes</button>
+          <p class="save-msg" id="saveMsg">✅ Profile updated successfully!</p>
+        </div>
+      </div>
+
+      <!-- CAR LOOKUP -->
+      <div class="card">
+        <h3 class="card-title"><i class="fa-solid fa-car"></i> Car Details Lookup</h3>
+        <p style="font-size:13px; color:var(--muted); margin-bottom:16px; line-height:1.7;">Enter your car's make and model to fetch specifications from the internet.</p>
+        <div class="car-lookup">
+          <input type="text" id="carSearchInput" placeholder="e.g. Toyota Corolla 2020">
+          <button class="btn-search" onclick="searchCar()"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        </div>
+        <div class="car-loading" id="carLoading"><i class="fa-solid fa-spinner fa-spin"></i> Fetching car details...</div>
+        <div class="car-error" id="carError">Car not found. Try a different model name.</div>
+        <div class="car-result" id="carResult">
+          <p class="car-result-title" id="carResultTitle">—</p>
+          <div class="car-spec"><span class="car-spec-label">Make</span><span class="car-spec-value" id="carMake">—</span></div>
+          <div class="car-spec"><span class="car-spec-label">Model</span><span class="car-spec-value" id="carModel">—</span></div>
+          <div class="car-spec"><span class="car-spec-label">Year</span><span class="car-spec-value" id="carYear">—</span></div>
+          <div class="car-spec"><span class="car-spec-label">Fuel Type</span><span class="car-spec-value" id="carFuel">—</span></div>
+          <div class="car-spec"><span class="car-spec-label">Drive Type</span><span class="car-spec-value" id="carDrive">—</span></div>
+          <div class="car-spec"><span class="car-spec-label">Transmission</span><span class="car-spec-value" id="carTransmission">—</span></div>
+          <div class="car-spec"><span class="car-spec-label">Engine Cylinders</span><span class="car-spec-value" id="carCylinders">—</span></div>
+          <div class="car-spec"><span class="car-spec-label">City MPG</span><span class="car-spec-value" id="carMpg">—</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOOKING HISTORY FULL WIDTH -->
+    <div class="card" style="margin-top:3px;">
+      <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Booking History</h3>
+      <div id="bookingHistory"></div>
+    </div>
+
+  </div>
+
+  <!-- NOT LOGGED IN -->
+  <div class="not-logged" id="notLogged" style="display:none;">
+    <i class="fa-solid fa-lock" style="font-size:48px; color:var(--red); margin-bottom:20px; display:block;"></i>
+    <h2>LOGIN REQUIRED</h2>
+    <p>Please login to view your profile and booking history.</p>
+    <a href="login.html" class="btn-red">Go to Login</a>
+  </div>
+
+  <script>
+    // Check session
+    const session = sessionStorage.getItem('carservice_loggedin');
+    const users = JSON.parse(localStorage.getItem('carservice_users') || '[]');
+    const bookings = JSON.parse(localStorage.getItem('carservice_bookings') || '[]');
+
+    if (!session) {
+      document.getElementById('notLogged').style.display = 'block';
+    } else {
+      document.getElementById('profilePage').style.display = 'block';
+      const user = JSON.parse(session);
+
+      // Find full user data from localStorage
+      const fullUser = users.find(u => u.email === user.email) || {};
+
+      // Navbar
+      document.getElementById('navUserName').textContent = user.name;
+
+      // Avatar initials
+      const initials = (fullUser.fname ? fullUser.fname[0] : user.name[0]).toUpperCase() +
+                       (fullUser.lname ? fullUser.lname[0] : '').toUpperCase();
+      document.getElementById('avatarInitials').textContent = initials || 'U';
+
+      // Header
+      document.getElementById('profileName').textContent = user.name.toUpperCase();
+      document.getElementById('profileEmail').textContent = user.email;
+
+      // Personal details
+      document.getElementById('detailFname').textContent = fullUser.fname || '—';
+      document.getElementById('detailLname').textContent = fullUser.lname || '—';
+      document.getElementById('detailEmail').textContent = fullUser.email || user.email;
+      document.getElementById('detailPhone').textContent = fullUser.phone || '—';
+
+      // Pre-fill edit form
+      document.getElementById('editFname').value = fullUser.fname || '';
+      document.getElementById('editLname').value = fullUser.lname || '';
+      document.getElementById('editPhone').value = fullUser.phone || '';
+
+      // Get vehicle from bookings
+      const userBookings = bookings.filter(b => b.email === user.email);
+      if (userBookings.length > 0) {
+        document.getElementById('detailVehicle').textContent = userBookings[userBookings.length - 1].vehicle || '—';
+      }
+
+      // Stats
+      document.getElementById('totalBookings').textContent = userBookings.length;
+      document.getElementById('memberSince').textContent = new Date().getFullYear();
+      if (userBookings.length > 0) {
+        document.getElementById('lastService').textContent = userBookings[userBookings.length - 1].service?.split(' ')[0] || '—';
+      }
+
+      // Booking history
+      const historyDiv = document.getElementById('bookingHistory');
+      if (userBookings.length === 0) {
+        historyDiv.innerHTML = `<div class="no-bookings"><i class="fa-solid fa-calendar-xmark"></i>No bookings yet. <a href="contact.html" style="color:var(--red);">Book your first service!</a></div>`;
+      } else {
+        historyDiv.innerHTML = [...userBookings].reverse().map(b => `
+          <div class="booking-card">
+            <div>
+              <p class="booking-service">${b.service || 'Service'}</p>
+              <p class="booking-meta">
+                Vehicle: <span>${b.vehicle || '—'}</span> &nbsp;|&nbsp;
+                Date: <span>${b.date || '—'}</span> &nbsp;|&nbsp;
+                Time: <span>${b.time || '—'}</span>
+              </p>
+            </div>
+            <span class="booking-status">Confirmed</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Toggle edit form
+    function toggleEdit() {
+      const form = document.getElementById('editForm');
+      form.classList.toggle('show');
+    }
+
+    // Save profile
+    function saveProfile() {
+      const session = JSON.parse(sessionStorage.getItem('carservice_loggedin'));
+      const users = JSON.parse(localStorage.getItem('carservice_users') || '[]');
+      const idx = users.findIndex(u => u.email === session.email);
+      if (idx !== -1) {
+        users[idx].fname = document.getElementById('editFname').value;
+        users[idx].lname = document.getElementById('editLname').value;
+        users[idx].phone = document.getElementById('editPhone').value;
+        localStorage.setItem('carservice_users', JSON.stringify(users));
+        // Update display
+        document.getElementById('detailFname').textContent = users[idx].fname;
+        document.getElementById('detailLname').textContent = users[idx].lname;
+        document.getElementById('detailPhone').textContent = users[idx].phone;
+        const newName = users[idx].fname + ' ' + users[idx].lname;
+        document.getElementById('profileName').textContent = newName.toUpperCase();
+        sessionStorage.setItem('carservice_loggedin', JSON.stringify({ ...session, name: newName }));
+      }
+      document.getElementById('saveMsg').classList.add('show');
+      setTimeout(() => document.getElementById('saveMsg').classList.remove('show'), 3000);
+    }
+
+    // Logout
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        sessionStorage.removeItem('carservice_loggedin');
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Car lookup using free API (api-ninjas.com cars API)
+    async function searchCar() {
+      const query = document.getElementById('carSearchInput').value.trim();
+      if (!query) return;
+
+      const parts = query.split(' ');
+      const make = parts[0] || '';
+      const model = parts[1] || '';
+      const year = parts[2] || '';
+
+      document.getElementById('carResult').classList.remove('show');
+      document.getElementById('carError').classList.remove('show');
+      document.getElementById('carLoading').classList.add('show');
+
+      try {
+        let url = `https://api.api-ninjas.com/v1/cars?make=${make}&model=${model}`;
+        if (year) url += `&year=${year}`;
+        url += '&limit=1';
+
+        const res = await fetch(url, {
+          headers: { 'X-Api-Key': 'YOUR_API_KEY_HERE' }
+        });
+        const data = await res.json();
+        document.getElementById('carLoading').classList.remove('show');
+
+        if (data && data.length > 0) {
+          const car = data[0];
+          document.getElementById('carResultTitle').textContent =
+            `${car.year} ${car.make?.toUpperCase()} ${car.model?.toUpperCase()}`;
+          document.getElementById('carMake').textContent = car.make || '—';
+          document.getElementById('carModel').textContent = car.model || '—';
+          document.getElementById('carYear').textContent = car.year || '—';
+          document.getElementById('carFuel').textContent = car.fuel_type || '—';
+          document.getElementById('carDrive').textContent = car.drive || '—';
+          document.getElementById('carTransmission').textContent = car.transmission || '—';
+          document.getElementById('carCylinders').textContent = car.cylinders || '—';
+          document.getElementById('carMpg').textContent = car.city_mpg ? car.city_mpg + ' mpg' : '—';
+          document.getElementById('carResult').classList.add('show');
+        } else {
+          document.getElementById('carError').classList.add('show');
+        }
+      } catch (err) {
+        document.getElementById('carLoading').classList.remove('show');
+        document.getElementById('carError').classList.add('show');
+      }
+    }
+
+    // Allow Enter key on car search
+    document.getElementById('carSearchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') searchCar();
+    });
+  </script>
+</body>
+</html>
